@@ -1047,7 +1047,147 @@ def init_uni_dist_out_obs(n_part, l_obs, obs_size):
                 
     return l_part
 
+def coeficiente(n,N,D):
+    #N es el numero de pasos, por lo que el tiempo total transcurrido hasta ese momento es
+    t = dt * N
+    return ((2*n + 1.)/(4*np.pi)) * np.exp(-n*(n + 1)*D*t)
+
+
+def distribucion(theta, N, orden,D):
+    #lista = []
+    c = np.zeros(orden)
+    for n in range(orden):
+        c[n] = coeficiente(n,N,D)
+        #lista.append(coeficiente(n,N)*np.polynomial.legendre.legval(np.cos(theta), c))
+    lista = np.polynomial.legendre.legval(np.cos(theta), c)
+    #print lista
+    #return sum(lista)
+    return lista
+
+def distribucion_weighted(theta, N, orden,D):
+    #lista = []
+    c = np.zeros(orden)
+    for n in range(orden):
+        c[n] = coeficiente(n,N,D)
+        #lista.append(coeficiente(n,N)*np.polynomial.legendre.legval(np.cos(theta), c))
+    lista = np.polynomial.legendre.legval(np.cos(theta), c)*np.sin(theta)*2*np.pi
+    #print lista
+    #return sum(lista)
+    return lista
+
+
+    def plot_free_diff(thetas, l_steps, title, dpi, save=False, show=True):
+    """This function plots """
+    theta = np.linspace(0.0,np.pi,1000)
+    tiempos = []
+    suma = 0.
+    for i in range(len(thetas)):
+        suma =+ i*dt
+        tiempos.append(suma)
+        
+    mean_cos_thetas_t =[]
+    for ensamble in thetas:
+        ensamble = np.array(ensamble)
+        cos_ens = np.cos(ensamble)
+        mean_cos_thetas_t.append(np.mean(cos_ens))
+
+    fig, ax = plt.subplots(figsize=(7,6))
+
+    ax.spines['bottom'].set_position('zero')
+    for i in l_steps:
+
+        #plt.hist(thetas[i], bins=int(( np.array(thetas[i][:]).max() - np.array(thetas[i][:]).min() )*40),
+        #         density=True,color='k', alpha=0.14, label='Numeric Solution', edgecolor='black', linewidth=.55);
+        ax.hist(thetas[i], bins=int(( np.array(thetas[i][:]).max() - np.array(thetas[i][:]).min() )*40),
+                 density=True,color='cadetblue', alpha=0.25, label='Numeric Solution', edgecolor='black', linewidth=.55);
+        ax.set_ylim(-.5,6.2)
+
+        if ((distribucion_weighted(theta,i,1000,D,dt)[np.argmax(distribucion_weighted(theta,i,1000,D,dt))]+ 0.35) < 6.5):
+            ax.text(theta[np.argmax(distribucion_weighted(theta,i,1000,D,dt))], 
+                     distribucion_weighted(theta,i,1000,D,dt)[np.argmax(distribucion_weighted(theta,i,1000,D,dt))]+ 0.2,
+                     't={0:.2f}'.format(i*dt), fontsize=12)
+        ax.plot(theta, distribucion_weighted(theta,i,1000,D,dt), color = 'k', alpha = .96,#
+                         label=r"$P(\theta,t|0,0) = \sum P_{l}(\cos{\theta})\, \exp{[-l(l+1)D\,t]}$",linewidth=.3);
+    ax.set_xlabel(r'$\theta$', size=19)
+    ax.set_ylabel(r'$P(\theta,t|0,0)$', size=19)
+
+    ax.set_xticks([i*.5 for i in range(7) ])
+    ax.set_yticks([i for i in range(7)])
+
+    ax.set_xticklabels([str(i*.5) for i in range(7) ], fontsize=13)
+    ax.set_yticklabels([str(i) for i in range(7)] , fontsize=13)
+
+    ins = inset_axes(ax, 
+                        width="50%", # width = 30% of parent_bbox
+                        height=2.0, # height : 1 inch
+                        loc=1)
+    #print(len(tiempos))
+    ins.plot(tiempos, mean_cos_thetas_t, label= 'Numeric', alpha=.75, linewidth=2.5,
+             color = 'cadetblue', linestyle=':')
+    #plt.scatter(tiempos, mean_cos_thetas_t, label= 'Numeric', marker='o', s=5, alpha=.05)
+    ins.plot(tiempos, np.exp(-(2*D*np.array(tiempos))), label='Analytic', color='k', linewidth=0.85, linestyle='-')
+    ins.legend(fontsize=12)
+    ins.set_xlabel(r"$t$", fontsize=15)
+    ins.set_ylabel(r"$\langle \mathbf{n}(t)\cdot \mathbf{n}(0) \rangle$", fontsize=14);
+    #ax.set_tight_layout();
+    if save:
+        fig.savefig(title, dpi=dpi)
+    if show:
+        plt.show()
 
 
 
+
+
+def plot_particles_Ylm(lista, vpolar, vazim, numero):
+    """This function plots an ensamble of particles on the surface of a unit sphere and a heatmap of the potential
+    interaction given by the first Spherical Harmonic with azimuthal symmetry, a Legendre Polynomial. vpolar and vazim
+    the angles for the perspective and numero is the number of a sequence to be appended to the saved exported file
+    with the purpose of making animations"""
+
+    #import matplotlib.pyplot as plt
+    #import numpy as np
+    from itertools import product, combinations
+    fig = plt.figure(figsize=(8,8))
+    ax = fig.gca(projection='3d')
+    #ax.set_aspect("equal")
+    ax._axis3don = False
+
+    
+
+
+
+    #draw sphere
+    
+    u, v = np.mgrid[0:2*np.pi:60j, 0:np.pi:60j]
+    
+    radio = np.sqrt(3./(4*np.pi))*np.cos(v)
+    
+    x=1.05*np.cos(u)*np.sin(v)
+    y=1.05*np.sin(u)*np.sin(v)
+    z=1.05*np.cos(v)
+    #ax.plot_surface(x, y, z, color="r", alpha = 0.15)
+    
+    
+    fcolors = np.sqrt(3./(4*np.pi))*np.cos(v)
+    fmax, fmin = fcolors.max(), fcolors.min()
+    fcolors = (fcolors - fmin)/(fmax - fmin)
+
+    ax.plot_surface(x, y, z,  rstride=1, cstride=1, facecolors=cm.viridis(fcolors), alpha = 0.38)
+
+    #ax.plot_surface(x, y, z, cmap=cm.YlGnBu_r, rstride=1, cstride=1, alpha = 0.10, linewidth = 0.10)
+    ax.view_init(vpolar, vazim)
+    
+    
+      
+    
+    #draw particles
+    for p in lista:
+        ax.scatter([p[0]],[p[1]],[p[2]],color="cadetblue", s=20, alpha = 0.85,
+                   linewidth=1.0, edgecolor='k')
+    
+    fig.savefig('SHY10_Field_X01_Img{}.png'.format(nombre(numero)))
+    #ax.view_init(80, 30)
+    #plt.show()
+    plt.close()
 
