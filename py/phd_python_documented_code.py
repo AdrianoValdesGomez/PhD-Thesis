@@ -293,10 +293,10 @@ def plot_particles(lista, vpolar, vazim, numero, titulo):
         ax.scatter([p[0]],[p[1]],[p[2]],color="b",s=15, alpha = 0.25)
     
     ax.view_init(vpolar, vazim)
-    fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
+    #fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
     
-    #plt.show()
-    plt.close()
+    plt.show()
+    #plt.close()
 
     
 
@@ -581,10 +581,10 @@ def act_gLan(pos_ini, vel_ini, Ext_F, ud_rand_F, m, gamma, delta_t):
     return pos_fin, vel_fin
 
 
-Kb = 13.8064852
+#Kb = 13.8064852
 
 
-def ese_V(T, m, delta_t, gamma):
+def ese_V(T, m, delta_t, gamma, Kb):
     """This function returns the variance of the velocity of a brownian particle whose velocity is normally 
     distributed and is at absolute temperature T, has a mass m, the friction coefficient of the medium is gamma
     and the fluctuatuons is considered in a window of time delta_t"""
@@ -593,21 +593,21 @@ def ese_V(T, m, delta_t, gamma):
     return abs(np.random.normal(loc=0., scale= np.sqrt(sigma2), size=None))
 
 
-def tangent_white_noise(x, delta_t, T, m, gamma):
+def tangent_white_noise(x, delta_t, T, m, gamma,Kb):
     """This function returns a vector with a 2 dimensional gaussian distribution of variance 4 K T gamma/m**2
     on the ttangent plane to the unit sphere at x"""
     v1, v2 = base_ort_nor(x)
-    s = ese_V(T, m, delta_t ,gamma )
+    s = ese_V(T, m, delta_t ,gamma ,Kb)
     return s * vector_des(v1,v2)
 
-def act_ensamble(l_pos, l_vel, Ext_F, U0, m, T, gamma, delta_t):
+def act_ensamble(l_pos, l_vel, Ext_F, U0, m, T, gamma, delta_t,Kb):
     """This function applies the updating recipe act_gLan to a list of initial positions and velocities
     l_pos, and l_vel and returns the updates of these lists"""
     l_npos = []
     l_nvel = []
     for i in range(len(l_pos)):
         pos, vel = l_pos[i], l_vel[i]
-        random_wn = tangent_white_noise(pos, delta_t, T, m, gamma)
+        random_wn = tangent_white_noise(pos, delta_t, T, m, gamma, Kb)
         #pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(*args), random_wn, m, gamma, delta_t)
         pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(pos, U0), random_wn, m, gamma, delta_t)
         #print(Ext_F(pos, U0))
@@ -615,14 +615,14 @@ def act_ensamble(l_pos, l_vel, Ext_F, U0, m, T, gamma, delta_t):
         l_nvel.append(vel_fin)
     return l_npos, l_nvel
 
-def act_ensamble_td_field(l_pos, l_vel, Ext_F, U0, m, T, gamma, delta_t, t, omega):
+def act_ensamble_td_field(l_pos, l_vel, Ext_F, U0, m, T, gamma, delta_t, t, omega,Kb):
     """This function applies the updating recipe act_gLan to a list of initial positions and velocities
     l_pos, and l_vel and returns the updates of these lists"""
     l_npos = []
     l_nvel = []
     for i in range(len(l_pos)):
         pos, vel = l_pos[i], l_vel[i]
-        random_wn = tangent_white_noise(pos, delta_t, T, m, gamma)
+        random_wn = tangent_white_noise(pos, delta_t, T, m, gamma,Kb)
         #pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(*args), random_wn, m, gamma, delta_t)
         pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(pos, U0, t, omega), random_wn, m, gamma, delta_t)
         #print(Ext_F(pos, U0))
@@ -646,12 +646,12 @@ def act_ensamble_arr(arr_pos, arr_vel, Ext_F, U0, m, T, gamma, delta_t):
     return pos_fin, vel_fin
 
 
-def n_vel_ini(x, n, delta_t, T, m, inten, gamma):
+def n_vel_ini(x, n, delta_t, T, m, inten, gamma,Kb):
     """This functions returns a list of n vectors in the tangent plane to the unit sphere at x,
     normally distributed and multipplied by the factor inten"""
     l_vel = []
     for i in range(n):
-        l_vel.append(inten * tangent_white_noise(x,delta_t,T,m,gamma))
+        l_vel.append(inten * tangent_white_noise(x,delta_t,T,m,gamma,Kb))
     return l_vel
 
 
@@ -1076,8 +1076,8 @@ def distribucion_weighted(theta, N, orden,D):
     return lista
 
 
-    def plot_free_diff(thetas, l_steps, title, dpi, save=False, show=True):
-    """This function plots """
+def plot_free_diff(thetas, l_steps, title, dpi, save=False, show=True):
+    
     theta = np.linspace(0.0,np.pi,1000)
     tiempos = []
     suma = 0.
@@ -1099,15 +1099,15 @@ def distribucion_weighted(theta, N, orden,D):
         #plt.hist(thetas[i], bins=int(( np.array(thetas[i][:]).max() - np.array(thetas[i][:]).min() )*40),
         #         density=True,color='k', alpha=0.14, label='Numeric Solution', edgecolor='black', linewidth=.55);
         ax.hist(thetas[i], bins=int(( np.array(thetas[i][:]).max() - np.array(thetas[i][:]).min() )*40),
-                 density=True,color='cadetblue', alpha=0.25, label='Numeric Solution', edgecolor='black', linewidth=.55);
+                density=True,color='cadetblue', alpha=0.25, label='Numeric Solution', edgecolor='black', linewidth=.55);
         ax.set_ylim(-.5,6.2)
 
         if ((distribucion_weighted(theta,i,1000,D,dt)[np.argmax(distribucion_weighted(theta,i,1000,D,dt))]+ 0.35) < 6.5):
             ax.text(theta[np.argmax(distribucion_weighted(theta,i,1000,D,dt))], 
-                     distribucion_weighted(theta,i,1000,D,dt)[np.argmax(distribucion_weighted(theta,i,1000,D,dt))]+ 0.2,
-                     't={0:.2f}'.format(i*dt), fontsize=12)
+                    distribucion_weighted(theta,i,1000,D,dt)[np.argmax(distribucion_weighted(theta,i,1000,D,dt))]+ 0.2,
+                    't={0:.2f}'.format(i*dt), fontsize=12)
         ax.plot(theta, distribucion_weighted(theta,i,1000,D,dt), color = 'k', alpha = .96,#
-                         label=r"$P(\theta,t|0,0) = \sum P_{l}(\cos{\theta})\, \exp{[-l(l+1)D\,t]}$",linewidth=.3);
+                        label=r"$P(\theta,t|0,0) = \sum P_{l}(\cos{\theta})\, \exp{[-l(l+1)D\,t]}$",linewidth=.3);
     ax.set_xlabel(r'$\theta$', size=19)
     ax.set_ylabel(r'$P(\theta,t|0,0)$', size=19)
 
@@ -1123,7 +1123,7 @@ def distribucion_weighted(theta, N, orden,D):
                         loc=1)
     #print(len(tiempos))
     ins.plot(tiempos, mean_cos_thetas_t, label= 'Numeric', alpha=.75, linewidth=2.5,
-             color = 'cadetblue', linestyle=':')
+            color = 'cadetblue', linestyle=':')
     #plt.scatter(tiempos, mean_cos_thetas_t, label= 'Numeric', marker='o', s=5, alpha=.05)
     ins.plot(tiempos, np.exp(-(2*D*np.array(tiempos))), label='Analytic', color='k', linewidth=0.85, linestyle='-')
     ins.legend(fontsize=12)
@@ -1191,3 +1191,15 @@ def plot_particles_Ylm(lista, vpolar, vazim, numero):
     #plt.show()
     plt.close()
 
+
+
+
+
+def dist_vel_ini(xs,delta_t, T,m,inten,gamma,Kb):
+    """Function that given a list of initial positions xs, generates an initial velocities distribution
+    one for each position, sampled from the bi gaussian distribution in each tangent plane with variance
+    4 Kb T gamma/m """
+    l_vel = []
+    for x in xs:
+        l_vel.append(inten*tangent_white_noise(x,delta_t,T,m,gamma,Kb))
+    return l_vel
