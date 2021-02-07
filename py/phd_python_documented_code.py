@@ -293,10 +293,10 @@ def plot_particles(lista, vpolar, vazim, numero, titulo):
         ax.scatter([p[0]],[p[1]],[p[2]],color="b",s=15, alpha = 0.25)
     
     ax.view_init(vpolar, vazim)
-    #fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
+    fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
     
-    plt.show()
-    #plt.close()
+    #plt.show()
+    plt.close()
 
     
 
@@ -1047,28 +1047,28 @@ def init_uni_dist_out_obs(n_part, l_obs, obs_size):
                 
     return l_part
 
-def coeficiente(n,N,D):
+def coeficiente(n,N,D,dt):
     #N es el numero de pasos, por lo que el tiempo total transcurrido hasta ese momento es
     t = dt * N
     return ((2*n + 1.)/(4*np.pi)) * np.exp(-n*(n + 1)*D*t)
 
 
-def distribucion(theta, N, orden,D):
+def distribucion(theta, N, orden,D,dt):
     #lista = []
     c = np.zeros(orden)
     for n in range(orden):
-        c[n] = coeficiente(n,N,D)
+        c[n] = coeficiente(n,N,D,dt)
         #lista.append(coeficiente(n,N)*np.polynomial.legendre.legval(np.cos(theta), c))
     lista = np.polynomial.legendre.legval(np.cos(theta), c)
     #print lista
     #return sum(lista)
     return lista
 
-def distribucion_weighted(theta, N, orden,D):
+def distribucion_weighted(theta, N, orden,D,dt):
     #lista = []
     c = np.zeros(orden)
     for n in range(orden):
-        c[n] = coeficiente(n,N,D)
+        c[n] = coeficiente(n,N,D,dt)
         #lista.append(coeficiente(n,N)*np.polynomial.legendre.legval(np.cos(theta), c))
     lista = np.polynomial.legendre.legval(np.cos(theta), c)*np.sin(theta)*2*np.pi
     #print lista
