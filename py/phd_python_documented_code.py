@@ -411,7 +411,7 @@ def field_y43(ri, v0):
     spherical harmonic Y43"""
     
     r, theta, phi = trans_c_s(ri[0], ri[1], ri[2])
-    
+    #coff43 =  - 105 * np.sqrt((5./(math.factorial(7) * np.pi))) 
     theta_field = coff43 * (np.cos(3 * phi) * np.sin(theta)**2 * (- np.sin(theta)**2 + 3 * np.cos(theta)**2 ))
     
     phi_field = coff43 * (- 3 * np.cos(theta) * np.sin(theta)**3 * np.sin(3 * phi))
@@ -560,7 +560,8 @@ def act_gLan(pos_ini, vel_ini, Ext_F, ud_rand_F, m, gamma, delta_t):
     on the surface of the unit sphere"""
     
     vel_fin = vel_ini*(1 - (gamma/m) * delta_t) + ud_rand_F + Ext_F * delta_t
-    
+    #print('vel_fin', vel_fin, 'norm_vel_ini-delta_t',np.linalg.norm(vel_ini)*delta_t, 'ud_rand_F',
+    #ud_rand_F,'Ext_field-delta', Ext_F * delta_t)
     if np.linalg.norm(vel_ini) > 0.:
         
         vel_fin = rot_finita(vel_fin, np.cross(vel_ini, pos_ini), np.linalg.norm(vel_ini * delta_t))
@@ -569,15 +570,16 @@ def act_gLan(pos_ini, vel_ini, Ext_F, ud_rand_F, m, gamma, delta_t):
     
     #if s > 1e-8:
     if s > 0 and s < np.pi/2:
-        
+        #print('s',s)
         uni_des = vel_ini * delta_t / s
-    
+        #print('uni_des',uni_des)
         q = np.tan(s)
         pos_fin = pos_ini + q*uni_des
         pos_fin = pos_fin / np.linalg.norm(pos_fin)
     else:
         pos_fin = pos_ini
     #print(np.linalg.norm(pos_fin))
+    #print('pos_fin dot vel_fin', np.dot(pos_fin, vel_fin))
     return pos_fin, vel_fin
 
 
@@ -593,7 +595,7 @@ def ese_V(T, m, delta_t, gamma, Kb):
     return abs(np.random.normal(loc=0., scale= np.sqrt(sigma2), size=None))
 
 
-def tangent_white_noise(x, delta_t, T, m, gamma,Kb):
+def tangent_white_noise(x, delta_t, T, m, gamma, Kb):
     """This function returns a vector with a 2 dimensional gaussian distribution of variance 4 K T gamma/m**2
     on the ttangent plane to the unit sphere at x"""
     v1, v2 = base_ort_nor(x)
