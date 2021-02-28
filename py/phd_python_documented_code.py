@@ -1205,3 +1205,112 @@ def dist_vel_ini(xs,delta_t, T,m,inten,gamma,Kb):
     for x in xs:
         l_vel.append(inten*tangent_white_noise(x,delta_t,T,m,gamma,Kb))
     return l_vel
+
+
+##########################################################################################################################
+
+# Dynamics with Memory Kernels
+
+def act_gLan_MKernels(pos_ini, vel_ini, Ext_F, ud_rand_F, m, gamma, delta_t, history):
+    """This function updates de position and velocity of a diffusion process restricted to move
+    on the surface of the unit sphere"""
+    
+    vel_fin = vel_ini*(1 - (gamma/m) * delta_t) + ud_rand_F + Ext_F * delta_t 
+    #print('vel_fin', vel_fin, 'norm_vel_ini-delta_t',np.linalg.norm(vel_ini)*delta_t, 'ud_rand_F',
+    #ud_rand_F,'Ext_field-delta', Ext_F * delta_t)
+    if np.linalg.norm(vel_ini) > 0.:
+        
+        vel_fin = rot_finita(vel_fin, np.cross(vel_ini, pos_ini), np.linalg.norm(vel_ini * delta_t))
+
+    s = np.linalg.norm(vel_ini * delta_t)
+    
+    #if s > 1e-8:
+    if s > 0 and s < np.pi/2:
+        #print('s',s)
+        uni_des = vel_ini * delta_t / s
+        #print('uni_des',uni_des)
+        q = np.tan(s)
+        pos_fin = pos_ini + q*uni_des
+        pos_fin = pos_fin / np.linalg.norm(pos_fin)
+    else:
+        pos_fin = pos_ini
+    #print(np.linalg.norm(pos_fin))
+    #print('pos_fin dot vel_fin', np.dot(pos_fin, vel_fin))
+    return pos_fin, vel_fin
+
+
+#Kb = 13.8064852
+
+
+
+def act_ensamble_MKernels(l_pos, l_vel, Ext_F, U0, m, T, gamma, delta_t,Kb):
+    """This function applies the updating recipe act_gLan to a list of initial positions and velocities
+    l_pos, and l_vel and returns the updates of these lists"""
+    l_npos = []
+    l_nvel = []
+    l_memories = []
+    for i in range(len(l_pos)):
+        pos, vel = l_pos[i], l_vel[i]
+        random_wn = tangent_white_noise(pos, delta_t, T, m, gamma, Kb)
+        #pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(*args), random_wn, m, gamma, delta_t)
+        pos_fin, vel_fin = act_gLan_MKernels(pos, vel, Ext_F(pos, U0), random_wn, m, gamma, delta_t,history)
+        #print(Ext_F(pos, U0))
+        l_npos.append(pos_fin)
+        l_nvel.append(vel_fin)
+    return l_npos, l_nvel
+
+def act_ensamble_td_field_MKernels(l_pos, l_vel, Ext_F, U0, m, T, gamma, delta_t, t, omega,Kb):
+    """This function applies the updating recipe act_gLan to a list of initial positions and velocities
+    l_pos, and l_vel and returns the updates of these lists"""
+    l_npos = []
+    l_nvel = []
+    for i in range(len(l_pos)):
+        pos, vel = l_pos[i], l_vel[i]
+        random_wn = tangent_white_noise(pos, delta_t, T, m, gamma,Kb)
+        #pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(*args), random_wn, m, gamma, delta_t)
+        pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(pos, U0, t, omega), random_wn, m, gamma, delta_t)
+        #print(Ext_F(pos, U0))
+        l_npos.append(pos_fin)
+        l_nvel.append(vel_fin)
+    return l_npos, l_nvel
+
+
+
+def plot_particles_pendulum(lista, vpolar, vazim, numero, titulo):
+    """This function plots a list of vectors given in lista on the surface of a unit sphere with a view 
+    an angle vpolar of inclination with respect to the plane x-y and rotated an angle of vazim angular units
+    in the direction around the z axis"""
+    from mpl_toolkits.mplot3d import axes3d
+    from mpl_toolkits.mplot3d import Axes3D
+    from matplotlib import cm
+
+    from itertools import product, combinations
+    fig = plt.figure(figsize=(8,8))
+    ax = fig.gca(projection='3d')
+    #ax.set_aspect("equal")
+    ax._axis3don = False
+
+
+    #draw sphere
+    R = 1
+    u, v = np.mgrid[0:2*np.pi:50j, 0:np.pi:50j]
+    x=R*np.cos(u)*np.sin(v)
+    y=R*np.sin(u)*np.sin(v)
+    z=R*np.cos(v)
+
+    ax.plot_surface(x, y, z, cmap=cm.YlGnBu_r,rstride=1, cstride=1, alpha = 0.10, linewidth = 0.10)
+    
+    
+    #draw points
+    for p in lista:
+        #ax.scatter([p[0]],[p[1]],[p[2]],color="b",s=15, alpha = 0.25)
+        ax.quiver(0,0,0,p[0],p[1],p[2])
+    
+    ax.view_init(vpolar, vazim)
+    fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
+    
+    #plt.show()
+    plt.close()
+
+
+
