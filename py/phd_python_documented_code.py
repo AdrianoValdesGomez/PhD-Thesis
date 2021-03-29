@@ -229,7 +229,8 @@ def rot_finita(r_ini, N, Phi):
     """This function rotates a vector r_ini around the direction given by the vector N, an angle Phi. It uses 
     algebraic operations only and three trigonometric evaluations."""
     n = N/np.linalg.norm(N)
-    r_fin = np.cos(Phi)*r_ini + (np.dot(n,r_ini))*(1 - np.cos(Phi))*n + (np.sin(Phi))*(np.cross(r_ini,n))
+    cos_theta = np.cos(Phi) 
+    r_fin = cos_theta*r_ini + (np.dot(n,r_ini))*(1 - cos_theta)*n + (np.sin(Phi))*(np.cross(r_ini,n))
     return r_fin
 
 
