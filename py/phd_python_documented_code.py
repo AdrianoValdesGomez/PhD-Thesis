@@ -294,10 +294,10 @@ def plot_particles(lista, vpolar, vazim, numero, titulo):
         ax.scatter([p[0]],[p[1]],[p[2]],color="b",s=15, alpha = 0.25)
     
     ax.view_init(vpolar, vazim)
-    fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
+    #fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
     
-    #plt.show()
-    plt.close()
+    plt.show()
+    #plt.close()
 
     
 
@@ -1001,13 +1001,13 @@ def adapted_path(pos_ini, vel_ini, field, U0, m, T, gamma, delta_t, l_obs, size_
     return updated_pos_at_t
 
 
-def adapted_path_tfield(pos_ini, vel_ini, field, U0, m, T, gamma, delta_t, l_obs, size_obs, sensitiveness, t, omega):
+def adapted_path_tfield(pos_ini, vel_ini, field, U0, m, T, gamma, delta_t, l_obs, size_obs, sensitiveness, t, omega,Kb):
     to_update = pos_ini
     tentative_paths = []
     updated_pos_at_t = []
     # Here it would be desireble; more economic computational speaking, to update just the position
     # of the particles using the velocities, but leave the velocities untouch.
-    tentative_pos, tentaive_vel = act_ensamble_td_field(pos_ini, vel_ini, field, U0, m, T, gamma, delta_t, t, omega)
+    tentative_pos, tentaive_vel = act_ensamble_td_field(pos_ini, vel_ini, field, U0, m, T, gamma, delta_t, t, omega,Kb)
 
     # Generates the points between initial and final points for each particle called the path
 
