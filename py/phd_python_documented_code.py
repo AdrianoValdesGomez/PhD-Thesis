@@ -1315,3 +1315,63 @@ def plot_particles_pendulum(lista, vpolar, vazim, numero, titulo):
 
 
 
+def time_histograms(l_s, palette, array, bins, fig_sx, fig_sy, theta, 
+                    phi, alpha, dt, xpot2, p0_Ylm, ypot, path, put_back=False):
+    """"""
+    fig = plt.figure(figsize=(fig_sx,fig_sy))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    colors = sns.color_palette(palette, len(l_s))
+
+
+    #ax.hist(x2[-1], bins = 50, density = True, color = c, alpha = 0.2,edgecolor='black', linewidth=0.5, label='')
+
+    for step, c in zip(range(len(l_s)+1), colors):
+        
+        #print(array[step])
+
+        hist_h, bins_h = np.histogram(array[l_s[step]], bins=bins,
+                                  density=True)
+        
+        xs = np.convolve(bins_h, np.ones(2), "valid")/2
+        #xs = (bins_h[:-1] + bins_h[1:])/2
+
+        #print(c)
+        xwidth = np.diff(bins_h)
+
+        ax.bar(xs, hist_h, zs=l_s[step]*dt, width=xwidth, zdir='y', color=c, ec='k', alpha=alpha, linewidth=0.5)
+        
+    if put_back:    
+        ax.plot(xpot2, p0_Ylm, zs=l_s[-1]*dt + 160*dt, zdir='y', color='k', alpha=0.8, linewidth=1.5)
+        hist_h, bins_h = np.histogram(x4[-1], bins=40,
+                                  density=True)
+        
+        xs = np.convolve(bins_h, np.ones(2), "valid")/2
+        #xs = (bins_h[:-1] + bins_h[1:])/2
+
+        #print(c)
+        xwidth = np.diff(bins_h)
+
+        ax.bar(xs, hist_h, zs=l_s[step]*dt+ 160*dt, width=xwidth, zdir='y', color=c, ec='k', alpha=alpha, linewidth=0.5)
+    else:
+        ax.plot(xpot2, p0_Ylm, zs=l_s[-1]*dt, zdir='y', color='k', alpha=0.8, linewidth=1.5)
+    #ax2 = ax.twinx()
+    #ax2.plot(xpot2, ypot, zs=l_s[-1]*dt, zdir='y', color = "r", linestyle = "-", label = r"$U(\theta) = \lambda Y_{2}^{0}(\theta, \phi)$")
+    #ax2.tick_params(axis='y', labelcolor='r')
+    ax.plot(xpot2, 0.5*np.sin(xpot2), zs=l_s[0]*dt, zdir='y',color = "g", linestyle = "--",label = r"$P(\theta,0) = \frac{1}{2}\,\sin{\theta}$")
+
+   
+    
+    ax.set_xlabel(r'$\theta$', fontsize=18)
+    ax.set_ylabel(r'$t$', fontsize=18)
+    ax.set_zlabel(r'$\overline{P}(\theta,t|\theta_0,t_0)$', fontsize=18)
+    #ax.tick_params(axis='z', labelrotation=45)
+    #ax.view(0,0)
+    ax.view_init(theta, phi)
+    #ax._axis3don = False
+    #ax.set_facecolor((1,1,1))
+    ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    plt.savefig(path, dpi=300)
+    plt.show()
