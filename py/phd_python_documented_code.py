@@ -294,7 +294,7 @@ def plot_particles(lista, vpolar, vazim, numero, titulo):
         ax.scatter([p[0]],[p[1]],[p[2]],color="b",s=15, alpha = 0.25)
     
     ax.view_init(vpolar, vazim)
-    #fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
+    fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
     
     plt.show()
     #plt.close()
