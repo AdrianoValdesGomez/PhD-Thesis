@@ -296,8 +296,8 @@ def plot_particles(lista, vpolar, vazim, numero, titulo):
     ax.view_init(vpolar, vazim)
     fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
     
-    plt.show()
-    #plt.close()
+    #plt.show()
+    plt.close()
 
     
 
@@ -649,15 +649,21 @@ def act_ensamble_arr(arr_pos, arr_vel, Ext_F, U0, m, T, gamma, delta_t):
     return pos_fin, vel_fin
 
 
-def n_vel_ini(x, n, delta_t, T, m, inten, gamma,Kb):
+def n_vel_ini(x, n, delta_t, T, m, inten, gamma, Kb):
     """This functions returns a list of n vectors in the tangent plane to the unit sphere at x,
-    normally distributed and multipplied by the factor inten"""
+    the same x for all n, normally distributed and multipplied by the factor inten"""
     l_vel = []
     for i in range(n):
         l_vel.append(inten * tangent_white_noise(x,delta_t,T,m,gamma,Kb))
     return l_vel
 
-
+def n_vel_ini_lx(l_x, delta_t, T, m, inten, gamma, Kb):
+    """This functions returns a list of n vectors in the tangent plane to the unit sphere at x,
+    normally distributed and multipplied by the factor inten"""
+    l_vel = []
+    for x in l_x:
+        l_vel.append(inten * tangent_white_noise(x,delta_t,T,m,gamma,Kb))
+    return l_ve
 
 
 
@@ -1313,11 +1319,11 @@ def plot_particles_pendulum(lista, vpolar, vazim, numero, titulo):
     #plt.show()
     plt.close()
 
-
+import seaborn as sns
 
 def time_histograms(l_s, palette, array, bins, fig_sx, fig_sy, theta, 
                     phi, alpha, dt, xpot2, p0_Ylm, ypot, path, put_back=False):
-    """"""
+    """This Function displays the histograms of a stochastic variable for a sequence of different times"""
     fig = plt.figure(figsize=(fig_sx,fig_sy))
     ax = fig.add_subplot(111, projection='3d')
     
@@ -1375,3 +1381,24 @@ def time_histograms(l_s, palette, array, bins, fig_sx, fig_sy, theta,
     ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
     plt.savefig(path, dpi=300)
     plt.show()
+
+
+
+
+
+
+
+def gen_autocorr(array):
+    """This function generates the autocorrelation function of a multidimensional
+    array of 3 dimensional vectors"""
+    autocorr_matrix = np.zeros((Nm + 1,Np))
+    for j in range(array_rs.shape[1]):
+        for i in range(array_rs.shape[0]):
+            autocorr_matrix[i][j] = np.dot(array_rs[0][j], array_rs[i][j])
+
+
+    autocorr_t = autocorr_matrix.mean(axis=1)
+    return autocorr_t
+
+
+
