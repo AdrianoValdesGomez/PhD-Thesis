@@ -1,6 +1,12 @@
 import numpy as np
 import math
 from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from itertools import product, combinations
+
+
 def orto(x):
     """Given a vector x, this function generates another one that is orthogonal with respect
     to the natural scalar product on 3 dimensional euclidean space E3"""
@@ -255,11 +261,11 @@ def plot_particles(lista, vpolar, vazim, numero, titulo):
     """This function plots a list of vectors given in lista on the surface of a unit sphere with a view 
     an angle vpolar of inclination with respect to the plane x-y and rotated an angle of vazim angular units
     in the direction around the z axis"""
-    from mpl_toolkits.mplot3d import axes3d
-    from mpl_toolkits.mplot3d import Axes3D
-    from matplotlib import cm
+    #from mpl_toolkits.mplot3d import axes3d
+    #from mpl_toolkits.mplot3d import Axes3D
+    #from matplotlib import cm
 
-    from itertools import product, combinations
+    #from itertools import product, combinations
     fig = plt.figure(figsize=(8,8))
     ax = fig.gca(projection='3d')
     #ax.set_aspect("equal")
@@ -560,7 +566,7 @@ def act_gLan(pos_ini, vel_ini, Ext_F, ud_rand_F, m, gamma, delta_t):
     """This function updates de position and velocity of a diffusion process restricted to move
     on the surface of the unit sphere"""
     
-    vel_fin = vel_ini*(1 - (gamma/m) * delta_t) + ud_rand_F + Ext_F * delta_t
+    vel_fin = vel_ini*(1 - (gamma/m) * delta_t) + ud_rand_F + Ext_F /m * delta_t
     #print('vel_fin', vel_fin, 'norm_vel_ini-delta_t',np.linalg.norm(vel_ini)*delta_t, 'ud_rand_F',
     #ud_rand_F,'Ext_field-delta', Ext_F * delta_t)
     if np.linalg.norm(vel_ini) > 0.:
@@ -571,11 +577,12 @@ def act_gLan(pos_ini, vel_ini, Ext_F, ud_rand_F, m, gamma, delta_t):
     
     #if s > 1e-8:
     if s > 0 and s < np.pi/2:
+    #if s > 0:
         #print('s',s)
         uni_des = vel_ini * delta_t / s
         #print('uni_des',uni_des)
         q = np.tan(s)
-        pos_fin = pos_ini + q*uni_des
+        pos_fin = pos_ini + q * uni_des
         pos_fin = pos_fin / np.linalg.norm(pos_fin)
     else:
         pos_fin = pos_ini
@@ -663,7 +670,7 @@ def n_vel_ini_lx(l_x, delta_t, T, m, inten, gamma, Kb):
     l_vel = []
     for x in l_x:
         l_vel.append(inten * tangent_white_noise(x,delta_t,T,m,gamma,Kb))
-    return l_ve
+    return l_vel
 
 
 
@@ -747,13 +754,13 @@ def secuencia_obs(N, Nfi, numero):
 
 
 def plot_particle_traj_obs(lista_obstaculos, trayectoria,  vpolar, vazim, numero, title):
-    from mpl_toolkits.mplot3d import axes3d
-    from mpl_toolkits.mplot3d import Axes3D
-    from matplotlib import cm
+    #from mpl_toolkits.mplot3d import axes3d
+    #from mpl_toolkits.mplot3d import Axes3D
+    #from matplotlib import cm
 
     #import matplotlib.pyplot as plt
     #import numpy as np
-    from itertools import product, combinations
+    #from itertools import product, combinations
     fig = plt.figure(figsize=(8,8))
     ax = fig.gca(projection='3d')
     #ax.set_aspect("equal")
@@ -856,11 +863,7 @@ def puntos_obs(lista_obstaculos, size, n_countor):
         b = size
         mis_obs = mis_obs + puntos_obs_j(a, b, n_countor)
     return mis_obs
-#Collision_check es una función que, dada una trayectoria: una lista de vectores que
-#pasan por puntos sucesivos de la trayectoria, verifica si alguna de estas posiciones
-#interesecto a alguno de los obstáculos. En caso de que así sea, actualiza conforme una
-#colision elastica. En caso de no intersectar a ningun obstaculo regresa una lista
-#con dos vectores: posicion inicial y posicion final en ese orden.
+
 
 def penetrate_obs(lista_vect, lista_obs, size):
     metiches = []
@@ -871,7 +874,7 @@ def penetrate_obs(lista_vect, lista_obs, size):
         for v in lista_vect:
             tamanho = np.cos(theta_omega)
             if np.dot(v,r_omega) >= tamanho:
-                #print('Penetro el mother fucker obstacle')
+                #print('Penetro el obstacle')
                 metiches.append(v)
                 
             else:
@@ -882,6 +885,11 @@ def penetrate_obs(lista_vect, lista_obs, size):
     
 
 def check_collision(lista_vect, lista_obs, size):
+    """Collision_check es una función que, dada una trayectoria: una lista de vectores que
+pasan por puntos sucesivos de la trayectoria, verifica si alguna de estas posiciones
+interesecto a alguno de los obstáculos. En caso de que así sea, actualiza conforme una
+colision elastica. En caso de no intersectar a ningun obstaculo regresa una lista
+con dos vectores: posicion inicial y posicion final en ese orden."""
     for obs in lista_obs:
         r_omega, theta_omega = obs, size 
         for v in lista_vect:
@@ -1156,7 +1164,7 @@ def plot_particles_Ylm(lista, vpolar, vazim, numero):
 
     #import matplotlib.pyplot as plt
     #import numpy as np
-    from itertools import product, combinations
+    #from itertools import product, combinations
     fig = plt.figure(figsize=(8,8))
     ax = fig.gca(projection='3d')
     #ax.set_aspect("equal")
@@ -1287,11 +1295,11 @@ def plot_particles_pendulum(lista, vpolar, vazim, numero, titulo):
     """This function plots a list of vectors given in lista on the surface of a unit sphere with a view 
     an angle vpolar of inclination with respect to the plane x-y and rotated an angle of vazim angular units
     in the direction around the z axis"""
-    from mpl_toolkits.mplot3d import axes3d
-    from mpl_toolkits.mplot3d import Axes3D
-    from matplotlib import cm
+    #from mpl_toolkits.mplot3d import axes3d
+    #from mpl_toolkits.mplot3d import Axes3D
+    #from matplotlib import cm
 
-    from itertools import product, combinations
+    #from itertools import product, combinations
     fig = plt.figure(figsize=(8,8))
     ax = fig.gca(projection='3d')
     #ax.set_aspect("equal")
@@ -1310,7 +1318,7 @@ def plot_particles_pendulum(lista, vpolar, vazim, numero, titulo):
     
     #draw points
     for p in lista:
-        #ax.scatter([p[0]],[p[1]],[p[2]],color="b",s=15, alpha = 0.25)
+        ax.scatter([p[0]],[p[1]],[p[2]],color="b",s=385, alpha = 0.75)
         ax.quiver(0,0,0,p[0],p[1],p[2])
     
     ax.view_init(vpolar, vazim)
@@ -1402,3 +1410,172 @@ def gen_autocorr(array):
 
 
 
+#MEMORY KERNELS EXPERIMENTATION
+
+
+#def calculate_non_local_force(Kernel, memory, tn, dt, n_memory):
+#    """This function calculates the non local force using the memory kernel and the history of velocities"""
+
+#    vectorial_sum = np.array([0,0,0])
+#    for v in memory:
+#        vectorial_sum = vectorial_sum + v[ti] * Kernel(tn - ti)
+#    return vectorial_sum
+
+
+
+
+
+
+#def act_Mori(pos_ini, vel_ini, Ext_F, ud_rand_F, m, gamma, delta_t, Memories, Kernel):
+#    """This function updates de position and velocity of a diffusion process restricted to move
+#    on the surface of the unit sphere"""
+    
+#    #First we need to calculate the convolution of the memory kernel with the velocity
+#    Non_local_force = 
+
+
+
+#    vel_fin = vel_ini*(1 - (gamma/m) * delta_t) + ud_rand_F + Ext_F * delta_t + 
+    #print('vel_fin', vel_fin, 'norm_vel_ini-delta_t',np.linalg.norm(vel_ini)*delta_t, 'ud_rand_F',
+    #ud_rand_F,'Ext_field-delta', Ext_F * delta_t)
+#    if np.linalg.norm(vel_ini) > 0.:
+        
+#        vel_fin = rot_finita(vel_fin, np.cross(vel_ini, pos_ini), np.linalg.norm(vel_ini * delta_t))
+
+#    s = np.linalg.norm(vel_ini * delta_t)
+    
+    #if s > 1e-8:
+#    if s > 0 and s < np.pi/2:
+        #print('s',s)
+#        uni_des = vel_ini * delta_t / s
+        #print('uni_des',uni_des)
+#        q = np.tan(s)
+#        pos_fin = pos_ini + q*uni_des
+#        pos_fin = pos_fin / np.linalg.norm(pos_fin)
+#    else:
+#        pos_fin = pos_ini
+    #print(np.linalg.norm(pos_fin))
+    #print('pos_fin dot vel_fin', np.dot(pos_fin, vel_fin))
+#    return pos_fin, vel_fin
+
+
+
+
+
+
+
+def act_ensamble_td_field(l_pos, l_vel, Ext_F, U0, m, T, gamma, delta_t, t, omega,Kb):
+    """This function applies the updating recipe act_gLan to a list of initial positions and velocities
+    l_pos, and l_vel and returns the updates of these lists"""
+    l_npos = []
+    l_nvel = []
+    l_memories = []
+    for i in range(len(l_pos)):
+        pos, vel = l_pos[i], l_vel[i]
+        random_wn = tangent_white_noise(pos, delta_t, T, m, gamma,Kb)
+        #pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(*args), random_wn, m, gamma, delta_t)
+        pos_fin, vel_fin = act_gLan(pos, vel, Ext_F(pos, U0, t, omega), random_wn, m, gamma, delta_t)
+        #print(Ext_F(pos, U0))
+        l_npos.append(pos_fin)
+        l_nvel.append(vel_fin)
+    return l_npos, l_nvel
+
+
+def plot_particles_pendulum_comparision(lista1, lista2, vpolar, vazim, numero, titulo):
+    """This function plots a list of vectors given in lista on the surface of a unit sphere with a view 
+    an angle vpolar of inclination with respect to the plane x-y and rotated an angle of vazim angular units
+    in the direction around the z axis"""
+    #from mpl_toolkits.mplot3d import axes3d
+    #from mpl_toolkits.mplot3d import Axes3D
+    #from matplotlib import cm
+
+    #from itertools import product, combinations
+    fig = plt.figure(figsize=(8,8))
+    ax = fig.gca(projection='3d')
+    #ax.set_aspect("equal")
+    ax._axis3don = False
+
+
+    #draw sphere
+    R = 1
+    u, v = np.mgrid[0:2*np.pi:50j, 0:np.pi:50j]
+    x=R*np.cos(u)*np.sin(v)
+    y=R*np.sin(u)*np.sin(v)
+    z=R*np.cos(v)
+
+    ax.plot_surface(x, y, z, cmap=cm.YlGnBu_r,rstride=1, cstride=1, alpha = 0.10, linewidth = 0.10)
+    
+    
+    #draw points
+    for p in lista1:
+        ax.scatter([p[0]],[p[1]],[p[2]],color="b",s=385, alpha = 0.75)
+        ax.quiver(0,0,0,p[0],p[1],p[2])
+    for p in lista2:
+        ax.scatter([p[0]],[p[1]],[p[2]],color="r",s=385, alpha = 0.75)
+        ax.quiver(0,0,0,p[0],p[1],p[2]) 
+
+    ax.view_init(vpolar, vazim)
+    fig.savefig('{}_Img_{}.png'.format(titulo,nombre(numero)))
+    
+    #plt.show()
+    plt.close()
+
+
+
+#4th Order Runge-Kutta for the Spherical Pendulum
+#import time
+
+#g = 9.81
+#theta0 = np.pi/2
+#phi0 = 0
+#dtheta0 = 0
+#dphi0 = 5
+
+
+
+#start_time = time.time()
+#l_theta = [theta0]
+#l_phi = [phi0]
+#l_dtheta = [dtheta0]
+#l_dphi = [dphi0]
+#x, y, z = trans_s_c(1,theta0, phi0)
+#l_pos_t = [np.array([x, y, z])]
+
+#for n in range(Np):
+#    k1_theta = h * dtheta0
+#    l1_dtheta = h * f1(theta0, phi0, dtheta0, dphi0)
+#    k1_phi = h * dphi0
+#    l1_dphi = h * f2(theta0, phi0, dtheta0, dphi0)
+#    k2_theta = h * (dtheta0 + 1/2. * l1_dtheta)
+#    l2_dtheta = h * f1(theta0 + 1/2. * k1_theta, phi0 + 1/2. * k1_phi , dtheta0 + 1/2. * l1_dtheta,
+#                       dphi0 + 1/2.*l1_dphi)
+#    k2_phi = h * (dphi0 + 1/2. * l1_dphi)
+#    l2_dphi = h * f2(theta0 + 1/2. * k1_theta, phi0 + 1/2. * k1_phi , dtheta0 + 1/2. * l1_dtheta, 
+#                     dphi0 + 1/2. * l1_dphi)
+#    k3_theta = h * (dtheta0 + 1/2. * l2_dtheta)
+#    l3_dtheta = h * f1(theta0 + 1/2. * k2_theta, phi0 + 1/2. * k2_phi , dtheta0 + 1/2. * l2_dtheta,
+#                       dphi0 + 1/2.*l2_dphi)
+#    k3_phi = h * (phi0 + 1/2. * l2_dphi)
+#    l3_dphi = h * f2(theta0 + 1/2. * k2_theta, phi0 + 1/2. * k2_phi , dtheta0 + 1/2. * l2_dtheta, 
+#                     dphi0 + 1/2. * l2_dphi)
+#    k4_theta = h * (dtheta0 + 1/2. * l3_dtheta)
+#    l4_dtheta = h * f1(theta0 + 1/2. * k3_theta, phi0 + 1/2. * k3_phi , dtheta0 + 1/2. * l3_dtheta,
+#                       dphi0 + 1/2.*l3_dphi)
+#    k4_phi = h * (phi0 + 1/2. * l3_dphi)
+#    l4_dphi = h * f2(theta0 + 1/2. * k3_theta, phi0 + 1/2. * k3_phi , dtheta0 + 1/2. * l3_dtheta, 
+#                     dphi0 + 1/2. * l3_dphi)
+#    theta0 = theta0 + 1/6. * (k1_theta + 2 * k2_theta + 2 * k3_theta + k4_theta)
+#    phi0 = phi0 + 1/6. * (k1_phi + 2 * k2_phi + 2 * k3_phi + k4_phi)
+#    dtheta0 = dtheta0 + 1/6. * (l1_dtheta + 2 * l2_dtheta + 2 * l3_dtheta + l4_dtheta)
+#    dphi0 = dphi0 + 1/6. * (l1_dphi + 2 * l2_dphi + 2 * l3_dphi + l4_dphi)
+    
+#    l_theta.append(theta0)
+#    l_phi.append(phi0)
+#    l_dtheta.append(dtheta0)
+#    l_dphi.append(dphi0)
+#    x, y, z = trans_s_c(1,theta0, phi0)
+#    l_pos_t.append(np.array([x, y, z]))
+    
+#end_time = time.time()
+#lapsed_time = end_time - start_time
+#print(lapsed_time)
