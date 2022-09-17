@@ -180,6 +180,18 @@ def trans_c_s(x,y,z):
     return r, theta, phi
 
 
+
+def Cartesian2Spherical(a_pos):
+    """Given an array a_pos, it returns its spherical angular co-ordinates theta and phi"""
+    r = np.sqrt(a_pos[0]**2 + a_pos[1]**2 + a_pos[2]**2)
+    rxy = np.sqrt(a_pos[0]**2 + a_pos[1]**2)
+    theta = np.arctan2(rxy, a_pos[2])
+    phi = np.arctan2(a_pos[1], a_pos[0])
+    return theta, phi
+
+
+
+
 def r_uni(theta, phi):
     """This function returns the unit vector in the direction in which r increases at the point (theta,phi)
     of the unit sphere"""
@@ -228,15 +240,16 @@ def var(D, delta_t):
 def ese(D, delta_t):
     """This function returns the magnitude of the random displacement displacement of a brownian particle
     that has a self-diffusion coeffient D, in a time interval of length delta_t"""
-    return abs(np.random.normal(loc = 0., scale = np.sqrt(var(D,delta_t)),size = None))
+    return abs(np.random.normal(loc = 0., scale = np.sqrt(var(D, delta_t)),size = None))
 
 
 def rot_finita(r_ini, N, Phi):
-    """This function rotates a vector r_ini around the direction given by the vector N, an angle Phi. It uses 
-    algebraic operations only and three trigonometric evaluations."""
+    """This function rotates a vector r_ini around the direction given by the vector N, an angle Phi. The rotation is in the clockwise sense!
+    Recall that a counterclockwise rotation of the coordinate system appears as a clockwise rotation of the vector. It uses 
+    algebraic operations only and two trigonometric evaluations."""
     n = N/np.linalg.norm(N)
     cos_theta = np.cos(Phi) 
-    r_fin = cos_theta*r_ini + (np.dot(n,r_ini))*(1 - cos_theta)*n + (np.sin(Phi))*(np.cross(r_ini,n))
+    r_fin = cos_theta * r_ini + (np.dot(n, r_ini)) * (1 - cos_theta) * n + (np.sin(Phi)) * (np.cross(r_ini, n))
     return r_fin
 
 
@@ -685,6 +698,16 @@ def theta_phi(l_pos):
         phis.append(phi)
     return thetas, phis
 
+
+
+
+
+
+
+
+
+
+
 def momentos_theta(thetas):
     promedio = np.mean(thetas)
     varianza = np.var(thetas)
@@ -1064,30 +1087,30 @@ def init_uni_dist_out_obs(n_part, l_obs, obs_size):
                 
     return l_part
 
-def coeficiente(n,N,D,dt):
+def coeficiente(n, N, D, dt):
     #N es el numero de pasos, por lo que el tiempo total transcurrido hasta ese momento es
     t = dt * N
-    return ((2*n + 1.)/(4*np.pi)) * np.exp(-n*(n + 1)*D*t)
+    return ((2*n + 1.)/(4*np.pi)) * np.exp(-n * (n + 1) * D * t)
 
 
-def distribucion(theta, N, orden,D,dt):
+def distribucion(theta, N, orden, D, dt):
     #lista = []
     c = np.zeros(orden)
     for n in range(orden):
-        c[n] = coeficiente(n,N,D,dt)
+        c[n] = coeficiente(n, N, D, dt)
         #lista.append(coeficiente(n,N)*np.polynomial.legendre.legval(np.cos(theta), c))
     lista = np.polynomial.legendre.legval(np.cos(theta), c)
     #print lista
     #return sum(lista)
     return lista
 
-def distribucion_weighted(theta, N, orden,D,dt):
+def distribucion_weighted(theta, N, orden, D, dt):
     #lista = []
     c = np.zeros(orden)
     for n in range(orden):
-        c[n] = coeficiente(n,N,D,dt)
+        c[n] = coeficiente(n, N, D, dt)
         #lista.append(coeficiente(n,N)*np.polynomial.legendre.legval(np.cos(theta), c))
-    lista = np.polynomial.legendre.legval(np.cos(theta), c)*np.sin(theta)*2*np.pi
+    lista = np.polynomial.legendre.legval(np.cos(theta), c) * np.sin(theta) * 2 * np.pi
     #print lista
     #return sum(lista)
     return lista
@@ -1575,7 +1598,32 @@ def plot_particles_pendulum_comparision(lista1, lista2, vpolar, vazim, numero, t
 #    l_dphi.append(dphi0)
 #    x, y, z = trans_s_c(1,theta0, phi0)
 #    l_pos_t.append(np.array([x, y, z]))
-    
+
+
 #end_time = time.time()
 #lapsed_time = end_time - start_time
 #print(lapsed_time)
+
+
+
+
+
+
+def coeficiente_H(n, N, D, dt, H):
+    #N es el numero de pasos, por lo que el tiempo total transcurrido hasta ese momento es
+    t = dt * N
+    return ((2 * n + 1.)/(4 * np.pi)) * np.exp(-n * (n + 1) * D * t**(2 * H))
+
+
+
+
+def distribucion_weighted_H(theta, N, orden, D, dt, H):
+    #lista = []
+    c = np.zeros(orden)
+    for n in range(orden):
+        c[n] = coeficiente_H(n, N, D, dt, H)
+        #lista.append(coeficiente(n,N)*np.polynomial.legendre.legval(np.cos(theta), c))
+    lista = np.polynomial.legendre.legval(np.cos(theta), c) * np.sin(theta) * 2 * np.pi
+    #print lista
+    #return sum(lista)
+    return lista
